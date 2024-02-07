@@ -70,11 +70,15 @@ export function NewNoteCard() {
               {shouldShowOnboard ? (
                 <p className="text-sm leading-6 text-slate-400">
                   Comece{' '}
-                  <button className="font-medium text-lime-400 underline-offset-4 transition-all hover:underline hover:underline-offset-4">
+                  <button
+                    type="button"
+                    className="font-medium text-lime-400 underline-offset-4 transition-all hover:underline hover:underline-offset-4"
+                  >
                     gravando uma nota
                   </button>{' '}
                   em áudio ou se preferir{' '}
                   <button
+                    type="button"
                     className="font-medium text-lime-400 underline-offset-4 transition-all hover:underline hover:underline-offset-4"
                     onClick={handleStartEditor}
                   >
