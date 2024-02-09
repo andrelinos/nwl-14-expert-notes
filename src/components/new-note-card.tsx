@@ -29,6 +29,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   const {
     handleSubmit,
     register,
+    setValue,
     reset,
     formState: { isSubmitting, errors },
   } = useForm<NodeProps>({
@@ -41,7 +42,8 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   }
 
   function handleContentChanged(event: ChangeEvent<HTMLTextAreaElement>) {
-    if (event.target.value === '') {
+    const textValue = event.target.value
+    if (textValue === '') {
       setShouldShowOnboarding(true)
     }
   }
@@ -59,11 +61,42 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   }
 
   function handleStartRecording() {
+    const isSpeechRecognitionAPIAvailable =
+      'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+
+    if (isSpeechRecognitionAPIAvailable) {
+      return toast.warning(
+        'Infelizmente seu navegador não suporta a API de gravação!',
+      )
+    }
+
+    setShouldShowOnboarding(false)
     setIsRecording(true)
+
+    speechRecognition.lang = 'pt-BR'
+    speechRecognition.continuous = true
+    speechRecognition.maxAlternatives = 1
+    speechRecognition.interimResults = true
+
+    speechRecognition.onresult = (event) => {
+      const transcription = Array.from(event.results).reduce((text, result) => {
+        return text.concat(result[0].transcript)
+      }, '')
+
+      setValue('content', transcription)
+    }
+
+    speechRecognition.onerror = (event) => {
+      console.log(event)
+    }
+
+    speechRecognition?.start()
   }
 
   function handleStopRecording() {
     setIsRecording(false)
+
+    speechRecognition?.stop()
   }
 
   return (
@@ -79,7 +112,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-        <Dialog.Content className="m fixed left-1/2 top-1/2 flex h-[60vh] w-full max-w-[640px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-md bg-slate-700 outline-none">
+        <Dialog.Content className="fixed inset-0 flex w-full flex-col overflow-hidden bg-slate-700 outline-none md:inset-auto md:left-1/2 md:top-1/2 md:h-[60vh] md:max-w-[640px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-md">
           <Dialog.Close className="absolute right-0 top-0 z-20 bg-slate-800 p-1.5 text-slate-400 transition-all hover:text-slate-100">
             <X className="size-5" />
           </Dialog.Close>
@@ -87,7 +120,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
           <form className="flex flex-1 flex-col">
             <div className="relative flex flex-1 flex-col gap-3 p-5 ">
               <span>Adicionar nota</span>
-              {shouldShowOnboard || isRecording ? (
+              {shouldShowOnboard ? (
                 <p className="text-sm leading-6 text-slate-400">
                   Comece{' '}
                   <button
@@ -134,10 +167,11 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
             {isRecording ? (
               <button
                 type="button"
-                className="w-full bg-slate-900 py-4 text-center font-medium text-slate-300 outline-none transition-all hover:brightness-105"
+                className="flex w-full items-center justify-center gap-2 bg-slate-900 py-4 text-center font-medium text-slate-300 outline-none transition-all hover:brightness-105"
                 disabled={isSubmitting}
                 onClick={handleStopRecording}
               >
+                <div className="size-3 animate-pulse rounded-full bg-red-500" />
                 Gravando! (clique p/interromper)
               </button>
             ) : (
