@@ -3,16 +3,18 @@ import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { X } from 'lucide-react'
 
-interface NodeProps {
+export interface NodeProps {
+  id: string
   date: Date
   content: string
 }
 
 interface NodeCardProps {
   note: NodeProps
+  onNoteDeleted: (id: string) => void
 }
 
-export function NoteCard({ note }: NodeCardProps) {
+export function NoteCard({ note, onNoteDeleted }: NodeCardProps) {
   return (
     <Dialog.Root>
       <Dialog.Trigger className="relative flex flex-col gap-3 overflow-hidden rounded-md bg-slate-800 p-5 text-left outline-none hover:ring-2 hover:ring-slate-600 focus:ring-lime-400 focus-visible:ring-2 focus-visible:ring-lime-400">
@@ -36,10 +38,10 @@ export function NoteCard({ note }: NodeCardProps) {
 
           <div className="flex flex-1 flex-col gap-3 p-5">
             <span>
-              {formatDistanceToNow(note.date, {
+              {/* {formatDistanceToNow(note?.date, {
                 locale: ptBR,
                 addSuffix: true,
-              })}
+              })} */}
             </span>
             <p className="text-sm leading-6 text-slate-400">{note.content}</p>
           </div>
@@ -47,6 +49,7 @@ export function NoteCard({ note }: NodeCardProps) {
           <button
             type="button"
             className="group w-full bg-slate-800 py-4 text-center font-medium text-slate-300 outline-none transition-all"
+            onClick={() => onNoteDeleted(note.id)}
           >
             Deseja{' '}
             <span className="text-red-400 underline-offset-4 hover:underline-offset-4 group-hover:underline">

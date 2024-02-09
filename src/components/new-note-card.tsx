@@ -7,17 +7,37 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { NodeProps } from './note-card'
+
+interface NewNoteCardProps {
+  onNoteCreated: (content: string) => void
+}
+
 const signInFormSchema = z.object({
-  note: z.string().min(15, 'Obrigatório no mínimo 15 caracteres.'),
+  content: z.string().min(1, 'Obrigatório.'),
 })
 
-type SignInFormProps = z.infer<typeof signInFormSchema>
+const SpeechRecognitionAPI =
+  window.SpeechRecognition || window.webkitSpeechRecognition
 
-export function NewNoteCard() {
+const speechRecognition = new SpeechRecognitionAPI()
+
+export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
+  const [isRecording, setIsRecording] = useState(false)
   const [shouldShowOnboard, setShouldShowOnboarding] = useState(true)
+
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<NodeProps>({
+    resolver: zodResolver(signInFormSchema),
+  })
 
   function handleStartEditor() {
     setShouldShowOnboarding(false)
+    setIsRecording(false)
   }
 
   function handleContentChanged(event: ChangeEvent<HTMLTextAreaElement>) {
@@ -26,21 +46,24 @@ export function NewNoteCard() {
     }
   }
 
-  const {
-    handleSubmit,
-    register,
-    formState: { isSubmitting, errors },
-  } = useForm<SignInFormProps>({
-    resolver: zodResolver(signInFormSchema),
-  })
-
-  function handleSaveNote(values: SignInFormProps) {
+  function handleSaveNote({ content }: { content: string }) {
     try {
+      onNoteCreated(content)
+      setShouldShowOnboarding(true)
+
       toast.success('Nota Salva com sucesso!')
-      console.log(values)
     } catch (error) {
       toast.error('Oops! Ocorreu um erro ao salvar nota.')
     }
+    reset({ content: '' })
+  }
+
+  function handleStartRecording() {
+    setIsRecording(true)
+  }
+
+  function handleStopRecording() {
+    setIsRecording(false)
   }
 
   return (
@@ -61,18 +84,16 @@ export function NewNoteCard() {
             <X className="size-5" />
           </Dialog.Close>
 
-          <form
-            className="flex flex-1 flex-col"
-            onSubmit={handleSubmit(handleSaveNote)}
-          >
+          <form className="flex flex-1 flex-col">
             <div className="relative flex flex-1 flex-col gap-3 p-5 ">
               <span>Adicionar nota</span>
-              {shouldShowOnboard ? (
+              {shouldShowOnboard || isRecording ? (
                 <p className="text-sm leading-6 text-slate-400">
                   Comece{' '}
                   <button
                     type="button"
                     className="font-medium text-lime-400 underline-offset-4 transition-all hover:underline hover:underline-offset-4"
+                    onClick={handleStartRecording}
                   >
                     gravando uma nota
                   </button>{' '}
@@ -93,11 +114,11 @@ export function NewNoteCard() {
                     'relative mb-2 flex-1 resize-none rounded-md bg-transparent p-4 text-sm leading-6 text-slate-400 outline-none',
                     {
                       'outline-none ring-1 ring-red-300 ring-opacity-50':
-                        errors.note,
+                        errors.content,
                     },
                   )}
                   autoFocus
-                  {...register('note', {
+                  {...register('content', {
                     onChange: handleContentChanged,
                   })}
                 />
@@ -106,17 +127,29 @@ export function NewNoteCard() {
                 htmlFor="note"
                 className="absolute bottom-2 right-4 text-xs text-red-400 opacity-70"
               >
-                {errors.note?.message}
+                {errors.content?.message}
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-lime-400 py-4 text-center font-medium text-lime-950 outline-none transition-all hover:brightness-95"
-              disabled={isSubmitting}
-            >
-              Salvar nota
-            </button>
+            {isRecording ? (
+              <button
+                type="button"
+                className="w-full bg-slate-900 py-4 text-center font-medium text-slate-300 outline-none transition-all hover:brightness-105"
+                disabled={isSubmitting}
+                onClick={handleStopRecording}
+              >
+                Gravando! (clique p/interromper)
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="w-full bg-lime-400 py-4 text-center font-medium text-lime-950 outline-none transition-all hover:brightness-95"
+                disabled={isSubmitting}
+                onClick={handleSubmit(handleSaveNote)}
+              >
+                Salvar nota
+              </button>
+            )}
           </form>
         </Dialog.Content>
       </Dialog.Portal>
