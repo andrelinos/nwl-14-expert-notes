@@ -19,7 +19,7 @@ interface NodeCardProps {
 export function NoteCard({ note, onNoteDeleted }: NodeCardProps) {
   return (
     <Dialog.Root>
-      <Dialog.Trigger className="relative flex flex-col gap-3 overflow-hidden rounded-md bg-slate-800 p-5 text-left outline-none hover:ring-2 hover:ring-slate-600 focus:ring-lime-400 focus-visible:ring-2 focus-visible:ring-lime-400">
+      <Dialog.Trigger className="relative flex flex-col gap-3 overflow-hidden rounded-md bg-slate-800 p-5 text-left outline-none hover:ring-2 hover:ring-slate-600  focus-visible:ring-2 focus-visible:ring-lime-400">
         <span className="text-sm font-medium text-slate-200">
           {formatDistanceToNow(note.date, {
             locale: ptBR,
