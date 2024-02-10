@@ -7,8 +7,12 @@ import { NoteCard } from './components/note-card'
 
 export interface AppNoteProps {
   id: string
-  date: Date
+  date: string
   content: string
+}
+
+function compareDates(a: { date: string }, b: { date: string }) {
+  return Date.parse(b.date) - Date.parse(a.date)
 }
 
 export function App() {
@@ -17,7 +21,11 @@ export function App() {
     const notesOnStorage = localStorage.getItem('notes')
 
     if (notesOnStorage) {
-      return JSON.parse(notesOnStorage)
+      const notesParsed = JSON.parse(notesOnStorage)
+
+      const notesShorted = notesParsed.sort(compareDates)
+
+      return notesShorted
     }
 
     return []
@@ -26,15 +34,17 @@ export function App() {
   function onNoteCreated(content: string) {
     const newNote = {
       id: crypto.randomUUID(),
-      date: new Date(),
+      date: new Date().toISOString(),
       content,
     }
 
     const notesArray = [...notes, newNote]
 
-    setNotes(notesArray)
+    const notesShorted = notesArray.sort(compareDates)
 
-    localStorage.setItem('notes', JSON.stringify(notesArray))
+    setNotes(notesShorted)
+
+    localStorage.setItem('notes', JSON.stringify(notesShorted))
   }
 
   function onNoteDeleted(id: string) {
@@ -83,6 +93,11 @@ export function App() {
             <NoteCard onNoteDeleted={onNoteDeleted} key={note.id} note={note} />
           )
         })}
+        <div className="fixed bottom-0 left-0 right-0 flex justify-end p-6">
+          <span className="mt-auto text-sm text-slate-400">
+            Você tem {notes.length} notas.
+          </span>
+        </div>
       </div>
     </div>
   )

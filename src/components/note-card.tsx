@@ -7,7 +7,7 @@ import { DialogDelete } from './dialog-delete'
 
 export interface NodeProps {
   id: string
-  date: Date
+  date: string
   content: string
 }
 
