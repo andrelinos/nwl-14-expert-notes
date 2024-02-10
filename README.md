@@ -64,7 +64,7 @@ As seguintes ferramentas foram utilizadas neste projeto:
 
 Antes de começar :checkered_flag:, você precisa ter o [Git](https://git-scm.com) e o [Node](https://nodejs.org/en/) instalados.
 
-## :checkered_flag: Começando ##
+## :checkered_flag: Iniciando ##
 
 ```bash
 # Clone este repositório
