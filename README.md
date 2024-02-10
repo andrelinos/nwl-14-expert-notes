@@ -82,7 +82,8 @@ $ npm run dev
 # O servidor iniciará em <http://localhost:3000>
 ```
 
-:memo: Licença
+## :memo: Licença ##
+
 Este projeto está sob licença MIT. Para mais detalhes, veja o arquivo LICENSE.
 
 Feito com :heart: por <a href="https://github.com/andrelinos" target="_blank">andrelinos</a>
